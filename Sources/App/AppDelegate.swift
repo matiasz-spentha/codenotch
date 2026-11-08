@@ -3,7 +3,7 @@ import Combine
 import SwiftUI
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    private var notchController: NotchWindowController?
+    private var notchController: CompactBandController?
     private var store: UsageStore?
     private var monitors: [String: any AgentActivityMonitor] = [:]
     private var preferences: Preferences?
@@ -38,7 +38,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.regular)
         guard !isRunningTests else { return }
 
-        let controller = NotchWindowController()
+        let controller = CompactBandController()
 
         // `CODENOTCH_DEMO=1` puts the design frame's three providers on screen
         // with its numbers, for screenshots and for eyeballing the layout.
@@ -101,29 +101,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             )
             controller.onOpenSettings = { [weak settings] in settings?.show() }
             self.settings = settings
-
-            // What changed, once per version — including on a fresh install,
-            // where it is the introduction.
-            let whatsNew = WhatsNewWindowController(
-                preferences: preferences, version: updater.currentVersion
-            )
-            self.whatsNew = whatsNew
-
-            // An agent app has no dock icon and no window: installed and
-            // launched, it shows four empty rings on a screen edge and no
-            // reason to look at them. Once, on the very first run, it opens the
-            // one place that explains what to connect.
-            //
-            // Sequenced behind What's New rather than beside it: two windows
-            // arriving together is one to dismiss before you can read either.
-            let introduce = { [weak settings] in
-                guard preferences.isFirstLaunch else { return }
-                settings?.show()
-            }
-            whatsNew.onDismiss = introduce
-            if !whatsNew.showIfNeeded() {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6, execute: introduce)
-            }
 
             let statusItem = StatusItemController { [weak settings] in settings?.show() }
             self.statusItem = statusItem

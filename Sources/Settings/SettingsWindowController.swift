@@ -64,7 +64,7 @@ final class SettingsWindowController {
             backing: .buffered,
             defer: false
         )
-        window.title = "Codenotch Settings"
+        window.title = "Spentha Band · Ajustes"
         window.contentView = NSHostingView(
             rootView: SettingsView(preferences: preferences,
                                    providers: providers,

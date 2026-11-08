@@ -48,16 +48,16 @@ final class Updater: NSObject, ObservableObject, SPUUpdaterDelegate {
     @Published private(set) var outcome: Outcome = .idle
 
     private lazy var controller = SPUStandardUpdaterController(
-        startingUpdater: true, updaterDelegate: self, userDriverDelegate: nil
+        startingUpdater: false, updaterDelegate: self, userDriverDelegate: nil
     )
 
     /// Mirrors the preference, so switching it off really does stop the checks
     /// rather than only hiding them.
     var automatic: Bool {
-        get { controller.updater.automaticallyChecksForUpdates }
+        get { false }
         set {
-            controller.updater.automaticallyChecksForUpdates = newValue
-            controller.updater.automaticallyDownloadsUpdates = newValue
+            controller.updater.automaticallyChecksForUpdates = false
+            controller.updater.automaticallyDownloadsUpdates = false
         }
     }
 
@@ -69,14 +69,13 @@ final class Updater: NSObject, ObservableObject, SPUUpdaterDelegate {
 
     /// Starts the scheduled checks. Deliberately not in `init`: the controller
     /// is lazy so that `self` exists before it is handed over as the delegate.
-    func start() { _ = controller }
+    func start() {}
 
     /// The manual path, for someone who does not want to wait for the schedule.
     /// This one *does* show UI — it was asked for, so silence would read as a
     /// broken button.
     func checkNow() {
-        outcome = .checking
-        controller.updater.checkForUpdates()
+        outcome = .failed("Versión propia · actualizaciones manuales")
     }
 
     // MARK: - SPUUpdaterDelegate

@@ -54,25 +54,12 @@ struct SettingsView: View {
             // read as three unrelated settings, and "Where Codenotch appears"
             // was a header long enough to look like a warning.
             Section("Appearance") {
-                Picker("Show", selection: $preferences.notchVisibility) {
-                    ForEach(NotchVisibility.allCases) { Text($0.title).tag($0) }
-                }
-                .pickerStyle(.segmented)
-
-                Text(preferences.notchVisibility.explanation)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                Picker("Edge", selection: $preferences.notchEdge) {
-                    ForEach(NotchEdge.allCases) { Text($0.title).tag($0) }
-                }
-                .pickerStyle(.segmented)
-
-                Text(preferences.notchEdge.explanation)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                Toggle("Mostrar banda", isOn: Binding(
+                    get: { preferences.notchVisibility != .hidden },
+                    set: { preferences.notchVisibility = $0 ? .alwaysShow : .hidden }
+                ))
+                Text("Arrastrá la banda desde el asa para ubicarla. Clic en un proveedor para ver consumo y tendencia.")
+                    .font(.caption).foregroundStyle(.secondary)
 
                 // "App icon", not "Icon": the two rows above it are about the
                 // notch, and on its own the word would read as another of them.
@@ -91,7 +78,7 @@ struct SettingsView: View {
             // without being asked, and one switch under its own header looked
             // like an oversight rather than a section.
             Section("General") {
-                Toggle("Open Codenotch at login", isOn: $preferences.launchAtLogin)
+                Toggle("Abrir Spentha Band al iniciar sesión", isOn: $preferences.launchAtLogin)
                 if let problem = preferences.launchAtLoginProblem {
                     Text(problem)
                         .font(.caption)
@@ -99,40 +86,9 @@ struct SettingsView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
-                Toggle("Install updates automatically", isOn: Binding(
-                    get: { updater.automatic },
-                    set: { updater.automatic = $0 }
-                ))
+                Text("Spentha Band · versión propia. Actualizaciones manuales.")
+                    .font(.caption).foregroundStyle(.secondary)
 
-                HStack(alignment: .firstTextBaseline, spacing: 10) {
-                    // Disclosed rather than merely silent. An app that updates
-                    // itself unprompted *and* reads other apps' credentials is
-                    // exactly the shape security tooling flags; saying so, with
-                    // a way to switch it off, is the difference between a
-                    // background updater and something that looks like it is
-                    // hiding.
-                    Text("Version \(updater.currentVersion). Updates install in the "
-                         + "background and apply next time Codenotch starts.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Spacer(minLength: 0)
-                    Button("Check now") { updater.checkNow() }
-                        .controlSize(.small)
-                }
-
-                // Says what happened, where the user is already looking.
-                // Sparkle's own answer to a failed check is a modal reading
-                // "an error occurred in retrieving update information", which
-                // names no cause and offers nothing to do about it.
-                if let message = updater.outcome.message {
-                    Text(message)
-                        .font(.caption)
-                        .foregroundStyle(
-                            updater.outcome == .unreachable ? .orange : .secondary
-                        )
-                        .fixedSize(horizontal: false, vertical: true)
-                }
             }
         }
         .formStyle(.grouped)
